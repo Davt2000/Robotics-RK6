@@ -1,33 +1,27 @@
-#pragma ide diagnostic ignored "hicpp-signed-bitwise"
-#include <opencv2/highgui.hpp>
+//
+// Created by perturabo on 30.10.2019.
+//
 #include <opencv2/opencv.hpp>
+using namespace cv;
 
-using  namespace cv;
-int main( int argc, char** argv )
+int main(int, char**)
 {
-    // задаём высоту и ширину картинки
-    int height = 440;
-    int width = 800;
-    // задаём точку для вывода текста
-    Point pt = Point( height/4, width/2 );
-    // Создаёи 8-битную, 3-канальную картинку и заливаем картинку чёрным цветом
-    Mat hw(height, width, CV_8UC3, Scalar(0,0,0));
-    // инициализация шрифта
-    // используя шрифт выводим на картинку текст
-    putText(hw,
-            "OpenCV Step By Step",
-            pt,
-            FONT_HERSHEY_PLAIN,
-            3,
-            Scalar(150,0,150),
-            4);
-    // создаём окошко
-    namedWindow("Hello World", 0);
-    // показываем картинку в созданном окне
-    imshow("Hello World", hw);
-    // ждём нажатия клавиши
-    waitKey(0);
+  VideoCapture cap(0); // open the default camera
+  if(!cap.isOpened())  // check if we succeeded
+    return -1;
 
-    // освобождаем ресурсы
-    return 0;
+  Mat edges;
+  namedWindow("edges",1);
+  for(;;)
+    {
+      Mat frame;
+      cap >> frame; // get a new frame from camera
+      cvtColor(frame, edges, COLOR_BGR2GRAY);
+      GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
+      Canny(edges, edges, 0, 30, 3);
+      imshow("edges", edges);
+      if(waitKey(30) >= 0) break;
+    }
+  // the camera will be deinitialized automatically in VideoCapture destructor
+  return 0;
 }
