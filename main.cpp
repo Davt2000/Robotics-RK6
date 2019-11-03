@@ -19,11 +19,15 @@ int main(int, char**) {
       return -1;
 
     Mat edges;
+    Mat prev;
+    Mat improved_edges;
     Mat frame;
     Mat contourOutput;
     std::vector<std::vector<cv::Point> > contours;
 
     namedWindow("edges",1);
+    namedWindow("improved_edges",1);
+    cap.read(edges);
 
     for(;;){
         clock_t a = clock();
@@ -37,13 +41,23 @@ int main(int, char**) {
         contourOutput = frame.clone();
         //contourOutput.convertTo(contourOutput, CV_8UC1);
         cvtColor(frame, edges, COLOR_BGR2GRAY);
+        cvtColor(contourOutput, improved_edges, COLOR_BGR2GRAY);
 
         GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
-        Canny(edges, edges, 0, 30, 3);
-
+        //Canny(edges, edges, 0, 30, 3);
+        // improved_edges = edges - prev;
+        cv::dilate (improved_edges, improved_edges,
+            cv::getStructuringElement(
+                cv::MORPH_RECT, cv::Size(1,1)
+                )
+            );
+        GaussianBlur(improved_edges, improved_edges, Size(7,7), 1.5, 1.5);
+        //Canny(improved_edges, improved_edges, 0, 30, 3);
         imshow("edges", edges);
-
-        cv::findContours(contourOutput, contours, cv::RETR_TREE, cv::CHAIN_APPROX_NONE ); // it drops here
+        imshow("improved_edges", improved_edges);
+        imshow("I_am_uporot", improved_edges);
+        imshow("Me_too", improved_edges);
+        /* cv::findContours(contourOutput, contours, cv::RETR_TREE, cv::CHAIN_APPROX_NONE ); // it drops here
 
         Mat contourImage(contourOutput.size(), CV_8UC1, cv::Scalar(0,0,0));
 
@@ -56,8 +70,9 @@ int main(int, char**) {
           }
 
         cv::imshow("Contours", contourImage);
-        cv::moveWindow("Contours", 200, 0);
+        cv::moveWindow("Contours", 200, 0); */
 
+        prev = edges;
         if(waitKey(30) >= 0) break;
     }
 
