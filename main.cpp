@@ -22,6 +22,7 @@ int main(int, char**) {
     Mat prev;
     Mat improved_edges;
     Mat frame;
+    Mat sobel_x_canny;
     Mat contourOutput;
     std::vector<std::vector<cv::Point> > contours;
 
@@ -42,8 +43,9 @@ int main(int, char**) {
         //contourOutput.convertTo(contourOutput, CV_8UC1);
         cvtColor(frame, edges, COLOR_BGR2GRAY);
         cvtColor(contourOutput, improved_edges, COLOR_BGR2GRAY);
+        prev = edges.clone ();
 
-        GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
+        //GaussianBlur(edges, edges, Size(7,7), 1.5, 1.5);
         //Canny(edges, edges, 0, 30, 3);
         // improved_edges = edges - prev;
         cv::dilate (improved_edges, improved_edges,
@@ -52,11 +54,14 @@ int main(int, char**) {
                 )
             );
         GaussianBlur(improved_edges, improved_edges, Size(7,7), 1.5, 1.5);
-        //Canny(improved_edges, improved_edges, 0, 30, 3);
+        Canny(improved_edges, improved_edges, 0, 55, 3);
+        Sobel(prev, prev, -1, 1, 1);
+        sobel_x_canny = prev.clone ();
+        Canny (sobel_x_canny, sobel_x_canny, 1, 85, 3);
         imshow("edges", edges);
         imshow("improved_edges", improved_edges);
-        imshow("I_am_uporot", improved_edges);
-        imshow("Me_too", improved_edges);
+        imshow("I_am_uporot", prev);
+        imshow("Me_too", sobel_x_canny);
         /* cv::findContours(contourOutput, contours, cv::RETR_TREE, cv::CHAIN_APPROX_NONE ); // it drops here
 
         Mat contourImage(contourOutput.size(), CV_8UC1, cv::Scalar(0,0,0));
@@ -72,7 +77,6 @@ int main(int, char**) {
         cv::imshow("Contours", contourImage);
         cv::moveWindow("Contours", 200, 0); */
 
-        prev = edges;
         if(waitKey(30) >= 0) break;
     }
 
